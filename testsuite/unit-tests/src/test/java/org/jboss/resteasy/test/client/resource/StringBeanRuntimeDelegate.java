@@ -1,5 +1,9 @@
 package org.jboss.resteasy.test.client.resource;
 
+import java.util.concurrent.CompletionStage;
+
+import javax.ws.rs.JAXRS.Configuration;
+import javax.ws.rs.JAXRS.Instance;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Link.Builder;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -73,4 +77,18 @@ public class StringBeanRuntimeDelegate extends RuntimeDelegate {
     public Builder createLinkBuilder() {
         return original.createLinkBuilder();
     }
+
+   @Override
+   public javax.ws.rs.JAXRS.Configuration.Builder createConfigurationBuilder()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public CompletionStage<Instance> bootstrap(Application application, Configuration configuration)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
 }

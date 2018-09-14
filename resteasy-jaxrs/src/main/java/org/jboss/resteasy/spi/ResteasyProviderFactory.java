@@ -27,7 +27,6 @@ import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.jboss.resteasy.specimpl.VariantListBuilderImpl;
 import org.jboss.resteasy.spi.metadata.ResourceBuilder;
 import org.jboss.resteasy.spi.metadata.ResourceClassProcessor;
-
 import org.jboss.resteasy.tracing.RESTEasyTracingLogger;
 import org.jboss.resteasy.util.FeatureContextDelegate;
 import org.jboss.resteasy.util.PickConstructor;
@@ -37,6 +36,9 @@ import org.jboss.resteasy.util.Types;
 import javax.annotation.Priority;
 import javax.ws.rs.ConstrainedTo;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.JAXRS;
+import javax.ws.rs.JAXRS.Configuration.Builder;
+import javax.ws.rs.JAXRS.Instance;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.Produces;
 import javax.ws.rs.RuntimeType;
@@ -90,10 +92,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -2696,6 +2698,15 @@ public class ResteasyProviderFactory extends RuntimeDelegate implements Provider
    public ResourceBuilder getResourceBuilder() {
       return resourceBuilder;
    }
+   public CompletionStage<Instance> bootstrap(Application application, JAXRS.Configuration configuration) {
+      //TODO: implement this 
+      return null;
+   }
 
-
+   @Override
+   public Builder createConfigurationBuilder()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
 }
