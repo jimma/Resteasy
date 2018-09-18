@@ -84,6 +84,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,11 +94,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.BiFunction;
 
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
@@ -2699,14 +2702,52 @@ public class ResteasyProviderFactory extends RuntimeDelegate implements Provider
       return resourceBuilder;
    }
    public CompletionStage<Instance> bootstrap(Application application, JAXRS.Configuration configuration) {
-      //TODO: implement this 
       return null;
    }
 
    @Override
    public Builder createConfigurationBuilder()
    {
-      // TODO Auto-generated method stub
-      return null;
+       return new ConfigurationBuilder();
+   }
+   
+   public class ConfigurationBuilder implements Builder {
+      private Map<String, Object> properties;
+      @SuppressWarnings("rawtypes")
+      private BiFunction propertiesProvider;
+      @Override
+      public javax.ws.rs.JAXRS.Configuration build()
+      {
+          return new ServerConfiguration();
+      }
+
+      @Override
+      public <T> Builder from(BiFunction<String, Class<T>, Optional<T>> propertiesProvider)
+      {
+         Objects.requireNonNull(propertiesProvider);
+         this.propertiesProvider = propertiesProvider;
+         return this;
+      }
+
+      @Override
+      public Builder property(String name, Object value)
+      {
+         properties.put(name, value);
+         return this;
+      }
+      
+      private class ServerConfiguration implements javax.ws.rs.JAXRS.Configuration {
+         @Override
+         public Object property(String name)
+         {
+            Object result = properties.get(name);
+            if (result == null && propertiesProvider != null)
+            {
+               result = propertiesProvider.apply(name, Object.class);
+               return ((Optional)result).get();
+            }
+            return result;
+         }
+      }
    }
 }
