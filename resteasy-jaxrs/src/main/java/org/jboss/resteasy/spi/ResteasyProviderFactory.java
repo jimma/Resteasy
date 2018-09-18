@@ -19,6 +19,7 @@ import org.jboss.resteasy.plugins.delegates.MediaTypeHeaderDelegate;
 import org.jboss.resteasy.plugins.delegates.NewCookieHeaderDelegate;
 import org.jboss.resteasy.plugins.delegates.UriHeaderDelegate;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+import org.jboss.resteasy.plugins.server.sun.http.SunHttpJaxrsServer;
 import org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages;
 import org.jboss.resteasy.resteasy_jaxrs.i18n.Messages;
 import org.jboss.resteasy.specimpl.LinkBuilderImpl;
@@ -97,10 +98,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
@@ -2701,10 +2704,65 @@ public class ResteasyProviderFactory extends RuntimeDelegate implements Provider
    public ResourceBuilder getResourceBuilder() {
       return resourceBuilder;
    }
-   public CompletionStage<Instance> bootstrap(Application application, JAXRS.Configuration configuration) {
-      return null;
-   }
 
+   public CompletionStage<Instance> bootstrap(Application application, JAXRS.Configuration configuration)
+   {
+      return CompletableFuture.supplyAsync(new Supplier<Instance>()
+      {
+
+         @Override
+         public Instance get()
+         {
+            SunHttpJaxrsServer server = new SunHttpJaxrsServer();
+            server.setPort(configuration.port());
+            server.setRootResourcePath(configuration.rootPath());
+            ResteasyDeployment deployment = new ResteasyDeployment();
+            deployment.setApplication(application);
+            server.setDeployment(deployment);
+            server.start();
+            return new Instance()
+            {
+               @Override
+               public javax.ws.rs.JAXRS.Configuration configuration()
+               {
+                  return configuration;
+               }
+
+               @Override
+               public CompletionStage<StopResult> stop()
+               {
+                  return CompletableFuture.supplyAsync(new Supplier<StopResult>() {
+
+                     @Override
+                     public StopResult get()
+                     {
+                         server.stop();
+                         return new StopResult() {
+
+                           @Override
+                           public <T> T unwrap(Class<T> nativeClass)
+                           {
+                              //TODO:implement this;
+                              return null;
+                           }
+                            
+                         };
+                     }
+                    
+                  });
+               }
+
+               @Override
+               public <T> T unwrap(Class<T> nativeClass)
+               {
+                  // TODO Auto-generated method stub
+                  return null;
+               }
+
+            };
+         }
+      });
+   }
    @Override
    public Builder createConfigurationBuilder()
    {
