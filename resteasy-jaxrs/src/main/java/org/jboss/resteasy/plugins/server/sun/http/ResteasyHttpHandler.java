@@ -7,8 +7,8 @@ import com.sun.net.httpserver.HttpHandler;
 import org.jboss.resteasy.core.Dispatcher;
 import org.jboss.resteasy.core.SynchronousDispatcher;
 import org.jboss.resteasy.core.ThreadLocalResteasyProviderFactory;
-import org.jboss.resteasy.plugins.server.sun.http.i18n.LogMessages;
-import org.jboss.resteasy.plugins.server.sun.http.i18n.Messages;
+import org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages;
+import org.jboss.resteasy.resteasy_jaxrs.i18n.Messages;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
