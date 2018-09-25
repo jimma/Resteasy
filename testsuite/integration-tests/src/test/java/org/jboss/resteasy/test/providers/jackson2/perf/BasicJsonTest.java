@@ -84,8 +84,12 @@ public class BasicJsonTest
    {
       return PortProviderUtil.generateURL(path, BasicJsonTest.class.getSimpleName());
    }
-
    @Test
+   public void testSleep() throws Exception {
+      Thread.sleep(9999999);
+   }
+
+   @org.junit.Ignore
    public void testBasic() throws Exception
    {
       Options opt = new OptionsBuilder().include(this.getClass().getName() + ".*")
