@@ -2770,7 +2770,7 @@ public class ResteasyProviderFactory extends RuntimeDelegate implements Provider
    }
    
    public class ConfigurationBuilder implements Builder {
-      private Map<String, Object> properties;
+      private Map<String, Object> properties = new HashMap<String, Object>();
       @SuppressWarnings("rawtypes")
       private BiFunction propertiesProvider;
       @Override
