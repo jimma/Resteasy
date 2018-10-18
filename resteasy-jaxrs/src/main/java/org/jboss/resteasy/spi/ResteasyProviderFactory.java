@@ -35,10 +35,12 @@ import org.jboss.resteasy.util.ThreadLocalStack;
 import org.jboss.resteasy.util.Types;
 
 import javax.annotation.Priority;
+import javax.net.ssl.SSLParameters;
 import javax.ws.rs.ConstrainedTo;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.JAXRS;
 import javax.ws.rs.JAXRS.Configuration.Builder;
+import javax.ws.rs.JAXRS.Configuration.SSLClientAuthentication;
 import javax.ws.rs.JAXRS.Instance;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.Produces;
@@ -2717,8 +2719,24 @@ public class ResteasyProviderFactory extends RuntimeDelegate implements Provider
             server.setPort(configuration.port());
             server.setHost(configuration.host());
             server.setRootResourcePath(configuration.rootPath());
-            server.setSSLContext(configuration.sslContext());
+            if (configuration.sslContext() != null)
+            {
+               if (configuration.sslClientAuthentication() == SSLClientAuthentication.NONE)
+               {
+                  configuration.sslContext().getDefaultSSLParameters().setNeedClientAuth(false);
+               }
+               if (configuration.sslClientAuthentication() == SSLClientAuthentication.OPTIONAL)
+               {
+                  configuration.sslContext().getDefaultSSLParameters().setWantClientAuth(true);
+               }
+               if (configuration.sslClientAuthentication() == SSLClientAuthentication.MANDATORY)
+               {
+                  configuration.sslContext().getDefaultSSLParameters().setNeedClientAuth(true);
+               }
+               server.setSSLContext(configuration.sslContext());
+            }
             server.setProtocol(configuration.protocol());
+
             ResteasyDeployment deployment = new ResteasyDeployment();
             deployment.setApplication(application);
             server.setDeployment(deployment);
