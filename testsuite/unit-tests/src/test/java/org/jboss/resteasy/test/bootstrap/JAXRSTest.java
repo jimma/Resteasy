@@ -1,6 +1,7 @@
 package org.jboss.resteasy.test.bootstrap;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 
@@ -119,7 +120,36 @@ public class JAXRSTest
       Assert.assertEquals("BootStrapApi", client.target("https://localhost:8445/wantclientauth/produces/string")
             .request().get(String.class));
    }
+   
+   @Test
+   public void testPropertyProvider() throws Exception {
+      TestPropertyProvider propertyProvider = new TestPropertyProvider();
+      JAXRS.Configuration config = JAXRS.Configuration.builder().from((name, type) -> {
+         return propertyProvider.getValue(name, type);
+      }).build();
+      CompletionStage<Instance> instance = JAXRS.start(new StandaloneApplication(), config);
+      instance.toCompletableFuture().get();
+      try (Client client = ClientBuilder.newClient())
+      {
+         Assert.assertEquals("BootStrapApi", client.target("http://localhost:8999/propertyProvider/produces/string")
+               .request().get(String.class));
+      }
+   }
 
+   class TestPropertyProvider {
+      public Optional<Object> getValue(String name, Class<?> type) {
+          if (name.equals(JAXRS.Configuration.HOST))
+             return Optional.of("localhost");
+          if (name.equals(JAXRS.Configuration.PORT)) {
+             return Optional.of(8999);
+          }
+          if (name.equals(JAXRS.Configuration.ROOT_PATH)) {
+             return Optional.of("propertyProvider");
+          }
+          return Optional.empty();
+      }
+   }
+   
    private ResteasyClient createClientWithCertificate(SSLContext sslContext, String... sniName)
    {
       ResteasyClientBuilder resteasyClientBuilder = new ResteasyClientBuilder();

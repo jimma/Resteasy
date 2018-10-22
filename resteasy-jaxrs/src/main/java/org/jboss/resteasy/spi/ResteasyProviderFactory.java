@@ -2765,7 +2765,6 @@ public class ResteasyProviderFactory extends RuntimeDelegate implements Provider
                            @Override
                            public <T> T unwrap(Class<T> nativeClass)
                            {
-                              //TODO:implement this;
                               return null;
                            }
                             
@@ -2778,7 +2777,6 @@ public class ResteasyProviderFactory extends RuntimeDelegate implements Provider
                @Override
                public <T> T unwrap(Class<T> nativeClass)
                {
-                  // TODO Auto-generated method stub
                   return null;
                }
 
@@ -2825,7 +2823,7 @@ public class ResteasyProviderFactory extends RuntimeDelegate implements Provider
             if (result == null && propertiesProvider != null)
             {
                result = propertiesProvider.apply(name, Object.class);
-               return ((Optional)result).get();
+               return ((Optional)result).isPresent() ? ((Optional)result).get() : null;
             }
             return result;
          }
