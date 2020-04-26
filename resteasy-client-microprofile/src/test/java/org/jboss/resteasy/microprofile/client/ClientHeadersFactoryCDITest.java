@@ -1,5 +1,7 @@
 package org.jboss.resteasy.microprofile.client;
 
+import java.net.URI;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,6 +12,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -52,6 +55,9 @@ public class ClientHeadersFactoryCDITest {
       @Path("hello/{h}")
       @GET
       String hello(@PathParam("h") String h);
+      @GET
+      @Path("date")
+      String getDate(@QueryParam("date") LocalDate date);
    }
 
    @Path("/")
@@ -61,6 +67,11 @@ public class ClientHeadersFactoryCDITest {
       @GET
       public String hello(@PathParam("h") String h) {
          return "hello " + h;
+      }
+      @GET
+      @Path("date")
+      public String getDate(@QueryParam("date") LocalDate date) {
+          return "QueryParam:" + date;
       }
    }
 
@@ -94,6 +105,8 @@ public class ClientHeadersFactoryCDITest {
       public Set<Class<?>> getClasses() {
          HashSet<Class<?>> classes = new HashSet<Class<?>>();
          classes.add(TestResource.class);
+         classes.add(DateParamConverter.class);
+         classes.add(DateParamConverterProvider.class);
          return classes;
       }
    }
@@ -115,11 +128,19 @@ public class ClientHeadersFactoryCDITest {
       server.stop();
       container.shutdown();
    }
-
    @Test
    public void test() {
       String result = container.select(Worker.class).get().work();
       Assert.assertEquals("hello Stefano", result);
       Assert.assertEquals(1, Counter.COUNT.get());
+   }
+   @Test
+   public void testNullParam() throws Exception{
+     TestResourceIntf client = org.eclipse.microprofile.rest.client.RestClientBuilder.newBuilder()
+               .baseUri(new URI("http://localhost:8081"))
+               .register(DateParamConverterProvider.class)
+               .build(TestResourceIntf.class);
+     Assert.assertEquals("Unexpected result", "QueryParam:2020-01-01", client.getDate(LocalDate.of(2020, 01, 01)));
+     Assert.assertEquals("Unexpected result", "QueryParam:null", client.getDate(null));
    }
 }

@@ -89,8 +89,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
 
                 int index = 0;
                 for (Object arg : args) {
-
-                    if (parameterAnnotations[index].length > 0) { // does a parameter converter apply?
+                    if (arg !=null && parameterAnnotations[index].length > 0) { // does a parameter converter apply?
 
                         ParamConverter<?> converter = ((ParamConverterProvider) p).getConverter(arg.getClass(), null, parameterAnnotations[index]);
                         if (converter != null) {
