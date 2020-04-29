@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.sse.SseEventSource;
@@ -33,7 +34,9 @@ public class SseAPITest {
         war.addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
         war.addAsManifestResource(PermissionUtil.createPermissionsXmlAsset(new RuntimePermission("modifyThread")),
                 "permissions.xml");
-        return TestUtil.finishContainerPrepare(war, null, SseAPIImpl.class, SseAPI.class);
+        List<Class<?>> singletons = new ArrayList<Class<?>>();
+        singletons.add(SseAPIImpl.class);
+        return TestUtil.finishContainerPrepare(war, null, singletons, SseAPI.class);
     }
 
     private String generateURL(String path) {
@@ -59,7 +62,7 @@ public class SseAPITest {
             eventSource.open();
             Client sendClient = ClientBuilder.newClient();
             WebTarget sendTarget = sendClient.target(generateURL("/apitest/send"));
-            Response response = sendTarget.request().get();
+            Response response = sendTarget.request().post(Entity.text("AnnotationInheritedEvent"));
             Assert.assertEquals(204,response.getStatus());
             sendClient.close();
             boolean result = countDownLatch.await(30, TimeUnit.SECONDS);
