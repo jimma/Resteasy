@@ -15,6 +15,7 @@ import javax.ws.rs.sse.SseEventSource;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.utils.PermissionUtil;
 import org.jboss.resteasy.utils.PortProviderUtil;
 import org.jboss.resteasy.utils.TestUtil;
@@ -45,33 +46,35 @@ public class SseAPITest {
 
     // test for RESTEASY-2017:SSE doesn't work with inherited annotations
     @Test
-    public void testAnnotaitonInherited() throws Exception {
-        final List<String> results = new ArrayList<String>();
-        Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(generateURL("/apitest/events"));
-        SseEventSource msgEventSource = SseEventSource.target(target).build();
+    public void testAnnotaitonInherited() throws Exception
+    {
+       final CountDownLatch latch = new CountDownLatch(1);
+       final List<String> results = new ArrayList<String>();
+       Client client = ClientBuilder.newBuilder().build();
+       WebTarget target = client.target(generateURL("/apitest/events"));
+       SseEventSource msgEventSource = SseEventSource.target(target).build();
+       try (SseEventSource eventSource = msgEventSource)
+       {
+          eventSource.register(event -> {
+             results.add(event.readData(String.class));
+             latch.countDown();
+          }, ex -> {
+                throw new RuntimeException(ex);
+             }) ;
+          eventSource.open();
 
-        try (SseEventSource eventSource = msgEventSource) {
-            CountDownLatch countDownLatch = new CountDownLatch(1);
-            eventSource.register(event -> {
-                countDownLatch.countDown();
-                results.add(event.readData(String.class));
-            }, e -> {
-                throw new RuntimeException(e);
-            });
-            eventSource.open();
-            Client sendClient = ClientBuilder.newClient();
-            WebTarget sendTarget = sendClient.target(generateURL("/apitest/send"));
-            Response response = sendTarget.request().post(Entity.text("AnnotationInheritedEvent"));
-            Assert.assertEquals(204,response.getStatus());
-            sendClient.close();
-            boolean result = countDownLatch.await(30, TimeUnit.SECONDS);
-            Assert.assertTrue("Waiting for event to be delivered has timed out.", result);
-        }
-        Assert.assertEquals("One event message was expected.", 1, results.size());
-        Assert.assertTrue("Expected event contains:AnnotationInheritedEvent, but is:" + results.get(0),
-                results.get(0).contains("AnnotationInheritedEvent"));
-        client.close();
+          Client messageClient = ((ResteasyClientBuilder)ClientBuilder.newBuilder()).connectionPoolSize(10).build();
+          WebTarget messageTarget = messageClient.target(generateURL("/apitest/send"));
+          Response response = messageTarget.request().post(Entity.text("apimsg"));
+          Assert.assertEquals(204,response.getStatus());
+          boolean result = latch.await(30, TimeUnit.SECONDS);
+          Assert.assertTrue("Waiting for event to be delivered has timed out.", result);
+          messageClient.close();
+       }
+       Assert.assertEquals("One event message was expected.", 1, results.size());
+       Assert.assertTrue("Expected event contains apimsg, but is:" + results.get(0),
+               results.get(0).contains("apimsg"));
+       client.close();
     }
 
 }
