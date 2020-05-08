@@ -27,7 +27,9 @@ public class SseAPIImpl implements SseAPI {
         if (sse == null) {
             throw new  IllegalStateException("No Sse injected");
         }
+        logger.info("********************SSEAPITest********************** : sending message : " + message);
         sseSink.send(sse.newEvent(message));
+        logger.info("********************SSEAPITest********************** : message sent");
     }
 
 }
