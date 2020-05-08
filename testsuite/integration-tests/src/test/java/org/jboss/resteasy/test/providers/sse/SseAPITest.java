@@ -58,8 +58,8 @@ public class SseAPITest {
        try (SseEventSource eventSource = msgEventSource)
        {
           eventSource.register(event -> {
-             results.add(event.readData(String.class));
              latch.countDown();
+             results.add(event.readData(String.class));
           }, ex -> {
                 throw new RuntimeException(ex);
              }) ;
