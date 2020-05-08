@@ -7,9 +7,11 @@ import javax.ws.rs.sse.OutboundSseEvent;
 import javax.ws.rs.sse.Sse;
 import javax.ws.rs.sse.SseEventSink;
 
+import org.jboss.logging.Logger;
+
 @Path("/apitest")
 public class SseAPIImpl implements SseAPI {
-
+    private static final Logger logger = Logger.getLogger(SseAPIImpl.class);
     private SseEventSink sseSink;
     @Context
     private Sse sse;

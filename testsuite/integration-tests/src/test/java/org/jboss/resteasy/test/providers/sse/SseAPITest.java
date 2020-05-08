@@ -1,5 +1,7 @@
 package org.jboss.resteasy.test.providers.sse;
 
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -67,9 +69,12 @@ public class SseAPITest {
           WebTarget messageTarget = messageClient.target(generateURL("/apitest/send"));
           Response response = messageTarget.request().post(Entity.text("apimsg"));
           Assert.assertEquals(204,response.getStatus());
+          Assert.assertTrue("event source is not opened", eventSource.isOpen());
           boolean result = latch.await(30, TimeUnit.SECONDS);
           Assert.assertTrue("Waiting for event to be delivered has timed out.", result);
           messageClient.close();
+       } catch (Exception e) {
+           fail(e.getMessage());
        }
        Assert.assertEquals("One event message was expected.", 1, results.size());
        Assert.assertTrue("Expected event contains apimsg, but is:" + results.get(0),
