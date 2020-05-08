@@ -26,11 +26,10 @@ public class SseAPIImpl implements SseAPI {
         if (sseSink == null) {
             throw new IllegalStateException("No SseSink is attached.");
         }
-        OutboundSseEvent.Builder eventBuilder = sse.newEventBuilder();
-        OutboundSseEvent sseEvent = eventBuilder.name("SseEvent")
-                .mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, message)
-                .comment("Sse Event").build();
-        sseSink.send(sseEvent);
+        if (sse == null) {
+            throw new  IllegalStateException("No Sse injected");
+        }
+        sseSink.send(sse.newEvent(message));
     }
 
 }
