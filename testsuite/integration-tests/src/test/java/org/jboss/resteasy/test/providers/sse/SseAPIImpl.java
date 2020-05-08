@@ -17,6 +17,7 @@ public class SseAPIImpl implements SseAPI {
     @Override
     public void events(SseEventSink evnetSink) {
         sseSink = evnetSink;
+        logger.info("********************SSEAPITest********************** : get evnetsink : " + sseSink.hashCode());
     }
 
     @Override
@@ -27,6 +28,7 @@ public class SseAPIImpl implements SseAPI {
         if (sse == null) {
             throw new  IllegalStateException("No Sse injected");
         }
+        logger.info("********************SSEAPITest********************** : sent to eventSink : " + sseSink.hashCode());
         logger.info("********************SSEAPITest********************** : sending message : " + message);
         sseSink.send(sse.newEvent(message));
         logger.info("********************SSEAPITest********************** : message sent");

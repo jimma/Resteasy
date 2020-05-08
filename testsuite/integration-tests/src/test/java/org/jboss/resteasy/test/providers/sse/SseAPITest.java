@@ -17,6 +17,7 @@ import javax.ws.rs.sse.SseEventSource;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.utils.PermissionUtil;
 import org.jboss.resteasy.utils.PortProviderUtil;
@@ -31,6 +32,7 @@ import org.junit.runner.RunWith;
 @RunWith(Arquillian.class)
 @RunAsClient
 public class SseAPITest {
+    private static final Logger logger = Logger.getLogger(SseAPITest.class);
     @Deployment
     public static Archive<?> deploy() {
         WebArchive war = TestUtil.prepareArchive(SseAPITest.class.getSimpleName());
@@ -59,7 +61,9 @@ public class SseAPITest {
        {
           eventSource.register(event -> {
              latch.countDown();
-             results.add(event.readData(String.class));
+             String msg = event.readData(String.class);
+             logger.info("*** Client get message: ****" + msg);
+             results.add(msg);
           }, ex -> {
                 throw new RuntimeException(ex);
              }) ;
