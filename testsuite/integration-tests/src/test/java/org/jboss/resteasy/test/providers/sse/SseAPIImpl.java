@@ -18,6 +18,8 @@ public class SseAPIImpl implements SseAPI {
     public void events(SseEventSink evnetSink) {
         sseSink = evnetSink;
         logger.info("********************SSEAPITest********************** : get evnetsink : " + sseSink.hashCode());
+        sseSink.send(sse.newEvent("start"));
+        logger.info("********************SSEAPITest********************** : sent message : start");
     }
 
     @Override

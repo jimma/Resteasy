@@ -52,7 +52,7 @@ public class SseAPITest {
     @Test
     public void testAnnotaitonInherited() throws Exception
     {
-       final CountDownLatch latch = new CountDownLatch(1);
+       final CountDownLatch latch = new CountDownLatch(2);
        final List<String> results = new ArrayList<String>();
        Client client = ClientBuilder.newBuilder().build();
        WebTarget target = client.target(generateURL("/apitest/events"));
@@ -80,9 +80,9 @@ public class SseAPITest {
        } catch (Exception e) {
            fail(e.getMessage());
        }
-       Assert.assertEquals("One event message was expected.", 1, results.size());
-       Assert.assertTrue("Expected event contains apimsg, but is:" + results.get(0),
-               results.get(0).contains("apimsg"));
+       Assert.assertEquals("One event message was expected.", 2, results.size());
+       Assert.assertTrue("Expected event contains apimsg, but is:" + results.get(1),
+               results.get(1).contains("apimsg"));
        client.close();
     }
 
