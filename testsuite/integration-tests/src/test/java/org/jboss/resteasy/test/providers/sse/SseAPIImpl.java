@@ -21,7 +21,7 @@ public class SseAPIImpl implements SseAPI {
     }
 
     @Override
-    public void send(String message) {
+    public String send(String message) {
         if (sseSink == null) {
             throw new IllegalStateException("No SseSink is attached.");
         }
@@ -32,6 +32,7 @@ public class SseAPIImpl implements SseAPI {
         logger.info("********************SSEAPITest********************** : sending message : " + message);
         sseSink.send(sse.newEvent(message));
         logger.info("********************SSEAPITest********************** : message sent");
+        return message;
     }
 
 }

@@ -72,7 +72,7 @@ public class SseAPITest {
           Client messageClient = ((ResteasyClientBuilder)ClientBuilder.newBuilder()).connectionPoolSize(10).build();
           WebTarget messageTarget = messageClient.target(generateURL("/apitest/send"));
           Response response = messageTarget.request().post(Entity.text("apimsg"));
-          Assert.assertEquals(204,response.getStatus());
+          Assert.assertEquals("apimsg",response.readEntity(String.class));
           Assert.assertTrue("event source is not opened", eventSource.isOpen());
           boolean result = latch.await(30, TimeUnit.SECONDS);
           Assert.assertTrue("Waiting for event to be delivered has timed out.", result);

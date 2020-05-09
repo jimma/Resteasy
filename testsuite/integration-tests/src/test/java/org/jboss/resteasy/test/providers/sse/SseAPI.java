@@ -15,5 +15,5 @@ public interface SseAPI {
 
     @Path("send")
     @POST
-    void send(String msg);
+    String send(String msg);
 }
