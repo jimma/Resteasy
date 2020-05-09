@@ -32,6 +32,12 @@ public class SseAPIImpl implements SseAPI {
         logger.info("********************SSEAPITest********************** : sending message : " + message);
         sseSink.send(sse.newEvent(message));
         logger.info("********************SSEAPITest********************** : message sent");
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return message;
     }
 
