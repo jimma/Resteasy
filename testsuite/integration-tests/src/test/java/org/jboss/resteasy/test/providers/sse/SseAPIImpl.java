@@ -35,8 +35,7 @@ public class SseAPIImpl implements SseAPI {
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
         return message;
     }
