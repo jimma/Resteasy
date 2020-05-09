@@ -11,7 +11,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.sse.SseEventSource;
 
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -71,8 +70,7 @@ public class SseAPITest {
 
           Client messageClient = ((ResteasyClientBuilder)ClientBuilder.newBuilder()).connectionPoolSize(10).build();
           WebTarget messageTarget = messageClient.target(generateURL("/apitest/send"));
-          Response response = messageTarget.request().post(Entity.text("apimsg"));
-          Assert.assertEquals("apimsg",response.readEntity(String.class));
+          messageTarget.request().post(Entity.text("apimsg"));
           Assert.assertTrue("event source is not opened", eventSource.isOpen());
           boolean result = latch.await(30, TimeUnit.SECONDS);
           Assert.assertTrue("Waiting for event to be delivered has timed out.", result);
