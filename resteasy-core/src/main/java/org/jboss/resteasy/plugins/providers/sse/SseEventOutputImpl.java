@@ -215,37 +215,11 @@ public class SseEventOutputImpl extends GenericType<OutboundSseEvent> implements
                CompletableFuture<Void> ret = new CompletableFuture<>();
                ServerResponseWriter.writeNomapResponse(jaxrsResponse, request, response,
                      ResteasyProviderFactory.getInstance(), t -> {
-                        AsyncOutputStream aos;
-                        try
-                        {
-                           aos = response.getAsyncOutputStream();
-                        } catch (IOException x)
-                        {
-                           close(false);
-                           ret.completeExceptionally(x);
-                           return;
-                        }
-                        // eager composition to guarantee ordering
-                        CompletionStage<Void> a = aos.asyncWrite(SseConstants.DOUBLE_EOL);
-                        CompletionStage<Void> b = aos.asyncFlush();
-                        // we've queued a response flush, so avoid a second one being queued
-                        responseFlushed = true;
-
-                        a.thenCompose(v -> b)
-                        .thenAccept(v -> {
-                           ret.complete(null);
-                        }).exceptionally(e -> {
-                           if(e instanceof CompletionException)
-                              e = e.getCause();
-                           if(e instanceof IOException)
-                              close(false);
-                           if(throwIOException)
-                              ret.completeExceptionally(e);
-                           else
-                              ret.completeExceptionally(new ProcessingException(Messages.MESSAGES.failedToCreateSseEventOutput(), e));
-                           return null;
-                        });
                   }, true);
+               response.getOutputStream().write(SseConstants.EOL);
+               response.getOutputStream().write(SseConstants.EOL);
+               response.flushBuffer();
+               responseFlushed = true;
                return ret;
             }
             catch (IOException e)
