@@ -187,6 +187,23 @@ public class SseEventOutputImpl extends GenericType<OutboundSseEvent> implements
                      // No element media type declared.
                      jaxrsResponse = (BuiltResponse) Response.ok().type(MediaType.SERVER_SENT_EVENTS).build();
 //                   // use "element-type=text/plain"?
+                     try
+                     {
+                        ServerResponseWriter.writeNomapResponse(jaxrsResponse, request, response,
+                              ResteasyProviderFactory.getInstance(), t -> {
+                           }, true);
+                        response.getOutputStream().write(SseConstants.EOL);
+                        response.getOutputStream().write(SseConstants.EOL);
+                        response.flushBuffer();
+                        responseFlushed = true;
+                     }
+                     catch (IOException e)
+                     {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                     }
+                     return CompletableFuture.completedFuture(null);
+
                   }
                }
                else
