@@ -69,7 +69,6 @@ public class HttpServletResponseWrapper implements HttpResponse
          try
          {
             stream.write(bytes, offset, length);
-            LOG.info("*************write operation do work****************");
             // we only are complete if isReady says we're good to write, otherwise
             // we will be complete in the next onWritePossible or onError
             if(sos == null || sos.isReady()) {
@@ -104,7 +103,6 @@ public class HttpServletResponseWrapper implements HttpResponse
             stream.flush();
             // we only are complete if isReady says we're good to write, otherwise
             // we will be complete in the next onWritePossible or onError
-            LOG.info("*************flush operation do work****************");
             if(sos == null || sos.isReady()) {
                future.complete(null);
             }
