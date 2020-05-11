@@ -200,7 +200,7 @@ public class SseEventOutputImpl extends GenericType<OutboundSseEvent> implements
                      catch (IOException e)
                      {
                         // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        //e.printStackTrace();
                      }
                      return CompletableFuture.completedFuture(null);
 
