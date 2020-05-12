@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.Produces;
@@ -57,6 +59,7 @@ public class SseEventOutputImpl extends GenericType<OutboundSseEvent> implements
    private boolean responseFlushed = false;
 
    private final Object lock = new Object();
+   private CountDownLatch dispatchedLatch = new CountDownLatch(1);
 
    public SseEventOutputImpl(final MessageBodyWriter<OutboundSseEvent> writer)
    {
@@ -284,6 +287,15 @@ public class SseEventOutputImpl extends GenericType<OutboundSseEvent> implements
             // But the TCK expects a real exception
             throw new IllegalStateException(Messages.MESSAGES.sseEventSinkIsClosed());
          }
+         if (ResteasyContext.getContextData(SseEventSink.class) == null) {
+            try
+            {
+               dispatchedLatch.await(5, TimeUnit.SECONDS);
+            }
+            catch (InterruptedException e)
+            {
+            }
+         }
          // eager composition to guarantee ordering
          CompletionStage<Void> a = internalFlushResponseToClient(true);
          CompletionStage<Void> b = writeEvent(event);
@@ -426,5 +438,10 @@ public class SseEventOutputImpl extends GenericType<OutboundSseEvent> implements
    {
       // required by checkcode
       return super.hashCode();
+   }
+
+   public void dispatched()
+   {
+      this.dispatchedLatch.countDown();
    }
 }

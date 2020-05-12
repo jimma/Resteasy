@@ -12,11 +12,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.sse.SseEventSink;
 
 import org.jboss.resteasy.core.ResteasyContext;
 import org.jboss.resteasy.core.ResteasyDeploymentImpl;
 import org.jboss.resteasy.core.SynchronousDispatcher;
 import org.jboss.resteasy.core.ThreadLocalResteasyProviderFactory;
+import org.jboss.resteasy.plugins.providers.sse.SseEventOutputImpl;
 import org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages;
 import org.jboss.resteasy.resteasy_jaxrs.i18n.Messages;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
@@ -255,6 +257,11 @@ public class ServletContainerDispatcher
          }
          finally
          {
+            SseEventSink sink = ResteasyContext.getContextData(SseEventSink.class);
+            if (sink != null) {
+               SseEventOutputImpl eventout = (SseEventOutputImpl)sink;
+               eventout.dispatched();
+            }
             ResteasyContext.clearContextData();
          }
       }
@@ -265,7 +272,6 @@ public class ServletContainerDispatcher
          {
             ThreadLocalResteasyProviderFactory.pop();
          }
-
       }
    }
 }

@@ -8,6 +8,7 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.ext.Provider;
 import javax.ws.rs.sse.SseEventSink;
 
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.Stream;
 import org.jboss.resteasy.core.PostResourceMethodInvoker;
 import org.jboss.resteasy.core.PostResourceMethodInvokers;
@@ -21,6 +22,7 @@ import org.jboss.resteasy.spi.util.FindAnnotation;
 @Priority(Integer.MAX_VALUE)
 public class SseEventSinkInterceptor implements ContainerRequestFilter
 {
+   private static final Logger LOG = Logger.getLogger(SseEventSinkInterceptor.class);
    @Override
    public void filter(ContainerRequestContext requestContext) throws IOException
    {
