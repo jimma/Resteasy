@@ -28,12 +28,6 @@ public class SseAPIImpl implements SseAPI {
         if (sse == null) {
             throw new  IllegalStateException("No Sse injected");
         }
-        logger.info("********************SSEAPITest********************** : Thread sleep 500ms");
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            logger.error(e.getMessage());
-        }
         logger.info("********************SSEAPITest********************** : sent to eventSink : " + sseSink.hashCode());
         logger.info("********************SSEAPITest********************** : sending message : " + message);
         sseSink.send(sse.newEvent(message));
