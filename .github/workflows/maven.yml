@@ -36,7 +36,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build with Maven Java ${{ matrix.java }} on WildFly ${{ matrix.wildfly-version }}
-        run: mvn clean install -fae '-Dserver.version=${{ matrix.wildfly-version }}'
+        run: mvn clean install -fae '-Dserver.version=${{ matrix.wildfly-version }}' -Dtest=SseTest -DfailIfNoTests=false
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
