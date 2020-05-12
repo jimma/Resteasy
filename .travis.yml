@@ -1,7 +1,7 @@
 script:
- -  mvn -B -Ptravis,jboss-repository -fae -Dserver.version=$SERVER_VERSION ${ELYTRON:+-Delytron} install -DskipTests=true
+ -  mvn -B -Ptravis,jboss-repository -Dserver.version=$SERVER_VERSION ${ELYTRON:+-Delytron} install -DskipTests=true
  -  cd testsuite/integration-tests
- -  mvn -B -Ptravis,jboss-repository -fae -Dserver.version=$SERVER_VERSION ${ELYTRON:+-Delytron} install -DfailIfNoTests=false
+ -  mvn -B -Ptravis,jboss-repository -ff -Dserver.version=$SERVER_VERSION ${ELYTRON:+-Delytron} install -DfailIfNoTests=false
  -  cat target/surefire-reports/org.jboss.resteasy.test.providers.sse.SseAPITest-output.txt
 language: java
 jdk:
