@@ -74,7 +74,7 @@ public class SseAPITest {
           Response response = messageTarget.request().post(Entity.text("apimsg"));
           Assert.assertEquals("apimsg",response.readEntity(String.class));
           Assert.assertTrue("event source is not opened", eventSource.isOpen());
-          boolean result = latch.await(30, TimeUnit.SECONDS);
+          boolean result = latch.await(10, TimeUnit.SECONDS);
           Assert.assertTrue("Waiting for event to be delivered has timed out.", result);
           messageClient.close();
        } catch (Exception e) {
