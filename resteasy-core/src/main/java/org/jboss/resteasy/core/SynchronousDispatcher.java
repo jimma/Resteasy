@@ -1,6 +1,7 @@
 package org.jboss.resteasy.core;
 
 import org.jboss.resteasy.core.interception.jaxrs.PreMatchContainerRequestContext;
+import org.jboss.resteasy.plugins.providers.sse.SseEventOutputImpl;
 import org.jboss.resteasy.plugins.server.Cleanable;
 import org.jboss.resteasy.plugins.server.Cleanables;
 import org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages;
@@ -29,6 +30,8 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Providers;
+import javax.ws.rs.sse.SseEventSink;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -416,6 +419,11 @@ public class SynchronousDispatcher implements Dispatcher
             {
                // Empty
             }
+         }
+         SseEventSink sink = ResteasyContext.getContextData(SseEventSink.class);
+         if (sink != null) {
+            SseEventOutputImpl eventout = (SseEventOutputImpl)sink;
+            eventout.dispatched();
          }
          ResteasyContext.clearContextData();
       }
