@@ -1,5 +1,7 @@
 package org.jboss.resteasy.test.providers.sse;
 
+import java.io.IOException;
+
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -29,6 +31,13 @@ public class SseAPIImpl implements SseAPI {
                 .mediaType(MediaType.TEXT_PLAIN_TYPE).data(String.class, message)
                 .comment("Sse Event").build();
         sseSink.send(sseEvent);
+    }
+    public void close() throws IOException {
+
+        if (sseSink != null) {
+            sseSink.close();
+            sseSink = null;
+        }
     }
 
 }

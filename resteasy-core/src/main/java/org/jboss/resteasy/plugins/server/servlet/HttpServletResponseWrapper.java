@@ -168,6 +168,14 @@ public class HttpServletResponseWrapper implements HttpResponse
       {
          AsyncOperation op = new FlushOperation(this);
          queue(op);
+         try
+         {
+            Thread.sleep(300);
+         }
+         catch (InterruptedException e)
+         {
+            // TODO Auto-generated catch block
+         }
          return op.future;
       }
 

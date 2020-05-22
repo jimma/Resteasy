@@ -1,5 +1,8 @@
 package org.jboss.resteasy.test.providers.sse;
 
+import java.io.IOException;
+
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -16,4 +19,6 @@ public interface SseAPI {
     @Path("send")
     @POST
     void send(String msg);
+    @DELETE
+    void close() throws IOException;
 }

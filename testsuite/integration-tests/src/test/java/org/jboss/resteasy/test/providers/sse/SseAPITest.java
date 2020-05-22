@@ -62,13 +62,14 @@ public class SseAPITest {
                 throw new RuntimeException(ex);
              }) ;
           eventSource.open();
-          Thread.sleep(1000);
+          //Thread.sleep(1000);
           Client messageClient = ((ResteasyClientBuilder)ClientBuilder.newBuilder()).connectionPoolSize(10).build();
           WebTarget messageTarget = messageClient.target(generateURL("/apitest/send"));
           Response response = messageTarget.request().post(Entity.text("apimsg"));
           Assert.assertEquals(204,response.getStatus());
           boolean result = latch.await(10, TimeUnit.SECONDS);
           Assert.assertTrue("Waiting for event to be delivered has timed out.", result);
+          messageClient.target(generateURL("/apitest")).request().delete();
           messageClient.close();
        }
        Assert.assertEquals("One event message was expected.", 1, results.size());
