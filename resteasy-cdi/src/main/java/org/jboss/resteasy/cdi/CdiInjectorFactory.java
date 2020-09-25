@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,6 +55,16 @@ public class CdiInjectorFactory implements InjectorFactory
       this.manager = manager;
       this.extension = lookupResteasyCdiExtension();
       sessionBeanInterface = extension.getSessionBeanInterface();
+   }
+
+   public CdiInjectorFactory(final BeanManager manager, final boolean client){
+      this.manager = manager;
+      if (!client) {
+         this.extension = lookupResteasyCdiExtension();
+         sessionBeanInterface = extension.getSessionBeanInterface();
+      } else {
+         sessionBeanInterface = Collections.emptyMap();
+      }
    }
 
    @Override

@@ -100,7 +100,7 @@ public class RestClientBuilderImpl implements RestClientBuilder {
             builderDelegate.providerFactory(localProviderFactory);
         }
         if (getBeanManager() != null) {
-           builderDelegate.getProviderFactory().setInjectorFactory(new CdiInjectorFactory(getBeanManager()));
+           builderDelegate.getProviderFactory().setInjectorFactory(new CdiInjectorFactory(getBeanManager(), true));
         }
         configurationWrapper = new ConfigurationWrapper(builderDelegate.getConfiguration());
 
@@ -598,22 +598,6 @@ public class RestClientBuilderImpl implements RestClientBuilder {
             return PROVIDER_FACTORY.injectedInstance(clazz);
         }
         return this.getBuilderDelegate().getProviderFactory().injectedInstance(clazz);
-      /*  else {
-            try {
-                Object obj = clazz.newInstance();
-                // 2.0 TCK has class with PostConstruct
-                for (Method m : obj.getClass().getMethods()) {
-                    if (m.getAnnotation(PostConstruct.class) != null) {
-                        m.invoke(obj, null);
-                        return obj;
-                    }
-                }
-                return obj;
-                //return clazz.newInstance();
-            } catch (Throwable t) {
-                throw new RuntimeException("Failed to register " + clazz, t);
-            }
-        }*/
     }
 
     @Override
