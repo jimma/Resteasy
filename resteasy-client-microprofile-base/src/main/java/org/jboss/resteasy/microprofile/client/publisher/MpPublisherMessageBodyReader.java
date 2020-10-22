@@ -1,9 +1,6 @@
 package org.jboss.resteasy.microprofile.client.publisher;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.FlowableEmitter;
-import io.reactivex.FlowableOnSubscribe;
+import io.smallrye.mutiny.Multi;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,39 +46,35 @@ public class MpPublisherMessageBodyReader implements MessageBodyReader<Publisher
                 streamType = MediaType.valueOf(elementType);
             }
         }
+        @SuppressWarnings("resource")
         SseEventInputImpl sseEventInput = new SseEventInputImpl(annotations, streamType, mediaType, httpHeaders, entityStream);
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        Flowable<?> flowable = Flowable.create(new FlowableOnSubscribe() {
-
-            @Override
-            public void subscribe(FlowableEmitter emitter) throws Exception {
-                Type typeArgument = null;
-                InboundSseEvent event;
-                if (genericType instanceof ParameterizedType) {
-                    typeArgument = ((ParameterizedType) genericType).getActualTypeArguments()[0];
-                    if (typeArgument.equals(InboundSseEvent.class)) {
-                        try {
-                            while ((event = sseEventInput.read(providers)) != null) {
-                                emitter.onNext(event);
-                            }
-                        } catch (Exception e) {
-                            emitter.onError(e);
+        Multi<?> multi = Multi.createFrom().emitter(emitter -> {
+            Type typeArgument = null;
+            InboundSseEvent event;
+            if (genericType instanceof ParameterizedType) {
+                typeArgument = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                if (typeArgument.equals(InboundSseEvent.class)) {
+                    try {
+                        while ((event = sseEventInput.read(providers)) != null) {
+                            emitter.emit(event);
                         }
-                        emitter.onComplete();
-                    } else {
-                        try {
-                            while ((event = sseEventInput.read(providers)) != null) {
-                                emitter.onNext(event.readData((Class) typeArgument));
-                            }
-                        } catch (Exception e) {
-                            emitter.onError(e);
-                        }
-                        emitter.onComplete();
+                    } catch (Exception e) {
+                        emitter.fail(e);
                     }
+                    emitter.complete();
+                } else {
+                    try {
+                        while ((event = sseEventInput.read(providers)) != null) {
+                            emitter.emit(event.readData((Class) typeArgument));
+                        }
+                    } catch (Exception e) {
+                        emitter.fail(e);
+                    }
+                    emitter.complete();
                 }
             }
-
-        }, BackpressureStrategy.BUFFER);
-        return flowable;
+        });
+        return multi;
     }
 }
