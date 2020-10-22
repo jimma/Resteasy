@@ -31,4 +31,8 @@ public interface LogMessages extends BasicLogger
    @LogMessage(level = Level.WARN)
    @Message(id = Messages.BASE + 187, value = "Closing a %s instance for you. Please close clients yourself.")
    void closingForYou(Class<?> clazz);
+
+   @LogMessage(level = Level.DEBUG)
+   @Message(id = Messages.BASE + 188, value = "MicroProfile sse client buffer overflow and oldest buffered item will be dropped")
+   void sseBufferOverflow();
 }

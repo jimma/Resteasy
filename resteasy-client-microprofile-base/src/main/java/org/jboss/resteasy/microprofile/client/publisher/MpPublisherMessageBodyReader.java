@@ -1,5 +1,6 @@
 package org.jboss.resteasy.microprofile.client.publisher;
 
+import io.reactivex.BackpressureOverflowStrategy;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
@@ -22,6 +23,7 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import javax.ws.rs.sse.InboundSseEvent;
 
+import org.jboss.resteasy.client.jaxrs.i18n.LogMessages;
 import org.jboss.resteasy.plugins.providers.sse.SseConstants;
 import org.jboss.resteasy.plugins.providers.sse.SseEventInputImpl;
 import org.reactivestreams.Publisher;
@@ -49,6 +51,7 @@ public class MpPublisherMessageBodyReader implements MessageBodyReader<Publisher
                 streamType = MediaType.valueOf(elementType);
             }
         }
+        @SuppressWarnings("resource")
         SseEventInputImpl sseEventInput = new SseEventInputImpl(annotations, streamType, mediaType, httpHeaders, entityStream);
         @SuppressWarnings({ "unchecked", "rawtypes" })
         Flowable<?> flowable = Flowable.create(new FlowableOnSubscribe() {
@@ -81,7 +84,11 @@ public class MpPublisherMessageBodyReader implements MessageBodyReader<Publisher
                 }
             }
 
-        }, BackpressureStrategy.BUFFER);
+        }, BackpressureStrategy.BUFFER).onBackpressureBuffer(
+                Integer.getInteger("resteasy.microprofile.sseclient.buffersize", 512),
+                () -> {
+                    LogMessages.LOGGER.sseBufferOverflow();
+                }, BackpressureOverflowStrategy.DROP_OLDEST);
         return flowable;
     }
 }
