@@ -17,10 +17,12 @@ import javax.ws.rs.ext.Provider;
 import javax.ws.rs.ext.Providers;
 import javax.ws.rs.sse.InboundSseEvent;
 
+import org.jboss.resteasy.client.jaxrs.i18n.LogMessages;
 import org.jboss.resteasy.plugins.providers.sse.SseConstants;
 import org.jboss.resteasy.plugins.providers.sse.SseEventInputImpl;
 import org.reactivestreams.Publisher;
 
+import reactor.core.publisher.BufferOverflowStrategy;
 import reactor.core.publisher.Flux;
 
 @Provider
@@ -78,7 +80,11 @@ public class MpPublisherMessageBodyReader implements MessageBodyReader<Publisher
                     emitter.complete();
                 }
             }
-        });
+        }).onBackpressureBuffer(
+                Integer.getInteger("resteasy.microprofile.sseclient.buffersize", 512),
+                t -> {
+                    LogMessages.LOGGER.sseBufferOverflow(t.toString());
+                }, BufferOverflowStrategy.DROP_OLDEST);
         return flux;
     }
 }
