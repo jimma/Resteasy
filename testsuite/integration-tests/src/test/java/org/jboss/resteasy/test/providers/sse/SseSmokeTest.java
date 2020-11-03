@@ -5,6 +5,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.test.providers.sse.resource.SseSmokeMessageBodyWriter;
 import org.jboss.resteasy.test.providers.sse.resource.SseSmokeResource;
 import org.jboss.resteasy.test.providers.sse.resource.SseSmokeUser;
@@ -22,6 +23,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.sse.SseEventSource;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -80,5 +82,29 @@ public class SseSmokeTest {
       Assert.assertEquals("One message was expected.", 1, results.size());
       Assert.assertThat("The message doesn't have expected content.","Zeytin;zeytin@resteasy.org",
             CoreMatchers.is(CoreMatchers.equalTo(results.get(0))));
+   }
+
+   @Test
+   public void testReadWithReader() throws Exception {
+       ResteasyClient client = (ResteasyClient) ClientBuilder.newBuilder()
+               .register(new SseSmokeUserReader())
+               .build();
+      final List<SseSmokeUser> users = new ArrayList<SseSmokeUser>();
+      WebTarget target = client.target(generateURL("/sse/events"));
+      SseEventSource msgEventSource = SseEventSource.target(target).build();
+
+      try (SseEventSource eventSource = msgEventSource) {
+         CountDownLatch countDownLatch = new CountDownLatch(1);
+         eventSource.register(event -> {
+            users.add(event.readData(SseSmokeUser.class));
+            countDownLatch.countDown();
+         }, e -> {
+               throw new RuntimeException(e);
+            });
+         eventSource.open();
+         boolean result = countDownLatch.await(30, TimeUnit.SECONDS);
+         Assert.assertTrue("Waiting for event to be delivered has timed out.", result);
+      }
+      Assert.assertEquals("zeytin@resteasy.org", users.get(0).getEmail());
    }
 }
