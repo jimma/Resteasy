@@ -109,6 +109,7 @@
         <version.io.projectreactor>Dysprosium-SR12</version.io.projectreactor>
 
         <version.asyncutil>0.1.0</version.asyncutil>
+        <version.org.jboss.jandex>2.2.3.Final</version.org.jboss.jandex>
     </properties>
 
     <distributionManagement>
@@ -155,7 +156,11 @@
                 <!-- Make sure the version matches the one used by Hibernate Validator itself -->
                 <version>${version.com.fasterxml.classmate}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.jboss</groupId>
+                <artifactId>jandex</artifactId>
+                <version>${version.org.jboss.jandex}</version>
+            </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
