@@ -30,6 +30,7 @@ import javax.ws.rs.ext.ReaderInterceptor;
 import javax.ws.rs.ext.RuntimeDelegate;
 import javax.ws.rs.ext.WriterInterceptor;
 
+import org.jboss.jandex.Index;
 import org.jboss.resteasy.spi.interception.JaxrsInterceptorRegistry;
 import org.jboss.resteasy.spi.metadata.ResourceBuilder;
 import org.jboss.resteasy.spi.statistics.StatisticsController;
@@ -356,4 +357,6 @@ public abstract class ResteasyProviderFactory extends RuntimeDelegate implements
    public abstract StatisticsController getStatisticsController();
 
    protected abstract boolean isOnServer();
+
+   public abstract Set<Index> getAnnotationIndex();
 }

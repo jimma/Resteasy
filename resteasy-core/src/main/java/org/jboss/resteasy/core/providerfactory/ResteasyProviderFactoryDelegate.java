@@ -6,6 +6,7 @@
  */
 package org.jboss.resteasy.core.providerfactory;
 
+import org.jboss.jandex.Index;
 import org.jboss.resteasy.spi.AsyncClientResponseProvider;
 import org.jboss.resteasy.spi.AsyncResponseProvider;
 import org.jboss.resteasy.spi.AsyncStreamProvider;
@@ -634,5 +635,10 @@ public class ResteasyProviderFactoryDelegate extends ResteasyProviderFactory
    @Override
    protected boolean isOnServer() {
       return resteasyProviderFactoryDelegator.isOnServer();
+   }
+
+   @Override
+   public Set<Index> getAnnotationIndex() {
+      return resteasyProviderFactoryDelegator.getAnnotationIndex();
    }
 }

@@ -1,5 +1,20 @@
 package org.jboss.resteasy.core;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ws.rs.Path;
+
+import org.jboss.jandex.Index;
+import org.jboss.jandex.Indexer;
 import org.jboss.resteasy.core.registry.RootClassNode;
 import org.jboss.resteasy.core.registry.RootNode;
 import org.jboss.resteasy.plugins.server.resourcefactory.JndiResourceFactory;
@@ -25,16 +40,6 @@ import org.jboss.resteasy.util.AnnotationResolver;
 import org.jboss.resteasy.util.GetRestful;
 import org.jboss.resteasy.util.IsHttpMethod;
 
-import javax.ws.rs.Path;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * Registry of resources and methods/classes that can dispatch HTTP method requests.
  *
@@ -52,6 +57,7 @@ public class ResourceMethodRegistry implements Registry
    protected RootNode rootNode = new RootNode();
    protected ResourceBuilder resourceBuilder;
    protected StatisticsController statisticsController;
+   protected Set<Index> indexes;
 
 
    public ResourceMethodRegistry(final ResteasyProviderFactory providerFactory)
@@ -59,6 +65,7 @@ public class ResourceMethodRegistry implements Registry
       this.providerFactory = providerFactory;
       this.resourceBuilder = providerFactory.getResourceBuilder();
       this.statisticsController = providerFactory.getStatisticsController();
+      this.indexes = providerFactory.getAnnotationIndex();
    }
 
    public boolean isWiderMatching()
@@ -205,6 +212,9 @@ public class ResourceMethodRegistry implements Registry
          }
          throw new RuntimeException(msg);
       }
+      Indexer indexer = new Indexer();
+      annotationIndex(indexer, restful);
+      this.indexes.add(indexer.complete());
       addResourceFactory(ref, resourceBuilder, base, restful);
    }
 
@@ -428,6 +438,7 @@ public class ResourceMethodRegistry implements Registry
 
    private void removeRegistration(String base, Class<?> clazz)
    {
+      //TODO:Jandex this
       for (Method method : clazz.getMethods())
       {
          Path path = method.getAnnotation(Path.class);
@@ -484,6 +495,18 @@ public class ResourceMethodRegistry implements Registry
       }
       finally {
          tracingLogger.logDuration("MATCH_SUMMARY", timestamp);
+      }
+   }
+
+   public void annotationIndex(Indexer indexer, Class clazz) {
+      String classPath = clazz.getName().replace('.', '/') + ".class";
+      InputStream stream = clazz.getClassLoader().getResourceAsStream(classPath);
+      if (stream != null) {
+         try {
+            indexer.index(stream);
+         } catch (IOException e) {
+            //TODO: Add log message
+         }
       }
    }
 }

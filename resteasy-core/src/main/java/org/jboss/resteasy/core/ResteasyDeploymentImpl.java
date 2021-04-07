@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.jboss.jandex.Indexer;
+
 /**
  * This class is used to configure and initialize the core components of RESTEasy.
  *
@@ -510,6 +512,8 @@ public class ResteasyDeploymentImpl implements ResteasyDeployment
             try
             {
                clazz = Thread.currentThread().getContextClassLoader().loadClass(resource.trim());
+               Indexer indexer = new Indexer();
+               //indexer.index(clazz.get)
             }
             catch (ClassNotFoundException e)
             {

@@ -1,15 +1,24 @@
 package org.jboss.resteasy.core.interception.jaxrs;
 
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import javax.ws.rs.core.MediaType;
+
+import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.DotName;
+import org.jboss.jandex.Index;
+import org.jboss.jandex.Type;
 import org.jboss.resteasy.annotations.DecorateTypes;
 import org.jboss.resteasy.annotations.Decorator;
 import org.jboss.resteasy.annotations.Decorators;
 import org.jboss.resteasy.core.MediaTypeMap;
+import org.jboss.resteasy.core.jandex.JandexUtil;
 import org.jboss.resteasy.spi.DecoratorProcessor;
-
-import javax.ws.rs.core.MediaType;
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.List;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 /**
  * Finds DecoratorProcessors and calls decorates on them by introspecting annotations.
@@ -22,6 +31,14 @@ import java.util.List;
  */
 public class DecoratorMatcher
 {
+   private Set<Index> indexSet;
+   public DecoratorMatcher() {
+
+   }
+   public DecoratorMatcher(final ResteasyProviderFactory factory) {
+      indexSet = factory.getAnnotationIndex();
+   }
+
    /**
     * @param targetClass i.e. Marshaller
     * @param target target object
@@ -124,6 +141,21 @@ public class DecoratorMatcher
       }
       return false;
    }
+
+   public <T> boolean hasDecorator(Class<T> targetClass) {
+      if (targetClass == null)
+         return false;
+      List<AnnotationInstance> annotations = JandexUtil.getAnnotations(this.indexSet, DotName.createSimple(Decorators.class.getName()));
+      for (AnnotationInstance annotation : annotations) {
+          AnnotationValue annotationValue = annotation.value("target");
+          Type type = annotationValue.asClass();
+         if (type.getClass().isAssignableFrom(targetClass)) {
+           return true;
+         }
+      }
+      return false;
+   }
+
 
    private <T> void registerDecorators(Class<T> targetClass, HashMap<Class<?>, Annotation> meta, Annotation[] annotations) {
       for (Annotation annotation : annotations) {

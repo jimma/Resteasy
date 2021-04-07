@@ -22,6 +22,7 @@ import org.jboss.resteasy.annotations.providers.jackson.Formatted;
 import org.jboss.resteasy.core.interception.jaxrs.DecoratorMatcher;
 import org.jboss.resteasy.core.messagebody.AsyncBufferedMessageBodyWriter;
 import org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.resteasy.util.DelegatingOutputStream;
 
 import com.fasterxml.jackson.core.JsonEncoding;
@@ -52,7 +53,7 @@ import com.fasterxml.jackson.jaxrs.util.ClassKey;
 public class ResteasyJackson2Provider extends JacksonJaxbJsonProvider implements AsyncBufferedMessageBodyWriter<Object>
 {
 
-   DecoratorMatcher decoratorMatcher = new DecoratorMatcher();
+   DecoratorMatcher decoratorMatcher = new DecoratorMatcher(ResteasyProviderFactory.getInstance());
 
 
    @Override
@@ -321,7 +322,8 @@ public class ResteasyJackson2Provider extends JacksonJaxbJsonProvider implements
          }
 
          // [RESTEASY-1317] Support Jackson in Atom links
-         if (decoratorMatcher.hasDecorator(DecoratedEntityContainer.class, annotations)) {
+
+         if (decoratorMatcher.hasDecorator(DecoratedEntityContainer.class)) {
             decoratorMatcher.decorate(DecoratedEntityContainer.class, new DecoratedEntityContainer(value), type, annotations, mediaType);
          }
 

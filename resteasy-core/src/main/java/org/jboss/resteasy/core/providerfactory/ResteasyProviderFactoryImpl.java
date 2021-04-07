@@ -1,5 +1,6 @@
 package org.jboss.resteasy.core.providerfactory;
 
+import org.jboss.jandex.Index;
 import org.jboss.resteasy.core.InjectorFactoryImpl;
 import org.jboss.resteasy.core.MediaTypeMap;
 import org.jboss.resteasy.core.ResteasyContext;
@@ -132,6 +133,7 @@ public class ResteasyProviderFactoryImpl extends ResteasyProviderFactory impleme
    protected boolean initialized = false;
    protected boolean lockSnapshots;
    protected StatisticsControllerImpl statisticsController = new StatisticsControllerImpl();
+   protected Set<Index> indexes;
 
    public ResteasyProviderFactoryImpl()
    {
@@ -243,6 +245,9 @@ public class ResteasyProviderFactoryImpl extends ResteasyProviderFactory impleme
 
 
       injectorFactory = parent == null ? InjectorFactoryImpl.INSTANCE : parent.getInjectorFactory();
+
+      indexes = parent == null ? new SnapshotSet<Index>(lockSnapshots) : new SnapshotSet<Index>(parent.getAnnotationIndex(), true, lockSnapshots, snapFirst);
+
       initialized = true;
    }
 
@@ -1746,5 +1751,10 @@ public class ResteasyProviderFactoryImpl extends ResteasyProviderFactory impleme
    @Override
    protected boolean isOnServer() {
       return ResteasyContext.searchContextData(Dispatcher.class) != null;
+   }
+
+   @Override
+   public Set<Index> getAnnotationIndex() {
+      return this.indexes;
    }
 }
