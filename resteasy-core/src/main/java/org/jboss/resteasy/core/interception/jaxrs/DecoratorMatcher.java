@@ -16,7 +16,6 @@ import org.jboss.resteasy.annotations.DecorateTypes;
 import org.jboss.resteasy.annotations.Decorator;
 import org.jboss.resteasy.annotations.Decorators;
 import org.jboss.resteasy.core.MediaTypeMap;
-import org.jboss.resteasy.core.jandex.JandexUtil;
 import org.jboss.resteasy.spi.DecoratorProcessor;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
@@ -145,12 +144,27 @@ public class DecoratorMatcher
    public <T> boolean hasDecorator(Class<T> targetClass) {
       if (targetClass == null)
          return false;
-      List<AnnotationInstance> annotations = JandexUtil.getAnnotations(this.indexSet, DotName.createSimple(Decorators.class.getName()));
-      for (AnnotationInstance annotation : annotations) {
-          AnnotationValue annotationValue = annotation.value("target");
-          Type type = annotationValue.asClass();
-         if (type.getClass().isAssignableFrom(targetClass)) {
-           return true;
+      for (Index index : this.indexSet) {
+         List<AnnotationInstance> annotations = index.getAnnotations(DotName.createSimple(Decorators.class.getName()));
+         if (!annotations.isEmpty()) {
+            for (AnnotationInstance annotation : annotations) {
+               AnnotationValue annotationValue = annotation.value("target");
+               Type type = annotationValue.asClass();
+               if (type.getClass().isAssignableFrom(targetClass)) {
+                  return true;
+               }
+            }
+         } else {
+            List<AnnotationInstance> decorators = index.getAnnotations(DotName.createSimple(Decorator.class.getName()));
+            if (!decorators.isEmpty()) {
+               for (AnnotationInstance annotation : decorators) {
+                  AnnotationValue annotationValue = annotation.value("target");
+                  Type type = annotationValue.asClass();
+                  if (type.getClass().isAssignableFrom(targetClass)) {
+                     return true;
+                  }
+               }
+            }
          }
       }
       return false;

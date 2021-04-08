@@ -60,7 +60,7 @@
 
         <!-- Checks for System.out -->
         <module name="RegexpSinglelineJava">
-            <property name="format" value="System\.out"/>
+            <!--property name="format" value="System\.out"/-->
             <property name="ignoreComments" value="true"/>
         </module>
 
