@@ -31,6 +31,8 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 public class DecoratorMatcher
 {
    private Set<Index> indexSet;
+   private final DotName DecoratorsName = DotName.createSimple(Decorators.class.getName());
+   private final DotName DecoratorName = DotName.createSimple(Decorator.class.getName());
    public DecoratorMatcher() {
 
    }
@@ -145,7 +147,7 @@ public class DecoratorMatcher
       if (targetClass == null)
          return false;
       for (Index index : this.indexSet) {
-         List<AnnotationInstance> annotations = index.getAnnotations(DotName.createSimple(Decorators.class.getName()));
+         List<AnnotationInstance> annotations = index.getAnnotations(DecoratorsName);
          if (!annotations.isEmpty()) {
             for (AnnotationInstance annotation : annotations) {
                AnnotationValue annotationValue = annotation.value("target");
@@ -155,7 +157,7 @@ public class DecoratorMatcher
                }
             }
          } else {
-            List<AnnotationInstance> decorators = index.getAnnotations(DotName.createSimple(Decorator.class.getName()));
+            List<AnnotationInstance> decorators = index.getAnnotations(DecoratorName);
             if (!decorators.isEmpty()) {
                for (AnnotationInstance annotation : decorators) {
                   AnnotationValue annotationValue = annotation.value("target");
