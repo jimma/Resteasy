@@ -17,17 +17,18 @@ import javax.json.JsonReaderFactory;
 import javax.json.JsonValue;
 import javax.json.JsonWriter;
 import javax.json.JsonWriterFactory;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.Provider;
 
 import org.jboss.resteasy.core.ResteasyContext;
 import org.jboss.resteasy.plugins.providers.AbstractPatchMethodFilter;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.spi.HttpResponseCodes;
+
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 @Priority(Integer.MAX_VALUE - 1)
