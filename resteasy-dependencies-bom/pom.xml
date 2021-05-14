@@ -32,7 +32,24 @@
         <version.io.netty.netty4>4.1.60.Final</version.io.netty.netty4>
         <version.io.vertx>4.0.3</version.io.vertx>
         <version.io.undertow>2.0.23.Final</version.io.undertow>
-        <version.jakarta.activation>2.0.1</version.jakarta.activation>
+        <!--boucycastle depends on this old version 1.2.1. The ActivationDataFlavor extends DataFalvor like :
+         public class ActivationDataFlavor extends DataFlavor {
+         but after in 2.0.1, this class doesn't extends DataFlavor
+         public c Class ActivationDataFlavor {
+
+         In bouncycastle, org.bouncycastle.mail.smime.handlers.pkcs7_signature has a DataFlavor array:
+         public class pkcs7_signature extends PKCS7ContentHandler {
+            private static final ActivationDataFlavor ADF = new ActivationDataFlavor(MimeBodyPart.class, "application/pkcs7-signature", "Signature");
+            private static final DataFlavor[] DFS;
+
+             static {
+                 DFS = new DataFlavor[]{ADF};
+             }
+          }
+          Upgrade to 2.0.1, bouncycastle throws java.lang.ArrayStoreException: jakarta.activation.ActivationDataFlavor
+        -->
+        <version.jakarta.activation>1.2.1-$$jakarta9$$</version.jakarta.activation>
+        <!--version.jakarta.activation>2.0.1</version.jakarta.activation-->
         <version.jakarta.enterprise.cdi-api>2.0.2</version.jakarta.enterprise.cdi-api>
         <version.jakarta.inject.jakarta.inject-api>1.0</version.jakarta.inject.jakarta.inject-api>
         <version.jakarta.json-api>1.1.6</version.jakarta.json-api>
