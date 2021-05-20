@@ -248,7 +248,6 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.0.0</version>
                         <executions>
                             <execution>
                                 <id>transform-ee9</id>
@@ -264,9 +263,7 @@
                                         <argument>${project.build.directory}/test-server/resteasy-jboss-modules-${project.version}</argument>
                                         <argument>${project.build.directory}/test-server/resteasy-ee9-jboss-modules-${project.version}</argument>
                                     </arguments>
-
                                 </configuration>
-
                                 <goals>
                                     <goal>java</goal>
                                 </goals>
