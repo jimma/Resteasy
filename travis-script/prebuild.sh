@@ -10,7 +10,7 @@ pushd $TRAVIS_HOME/optimus
 mvn --quiet clean install -DskipTest=true
 popd
 
-git clone --depth=1 --branch=main https://github.com/wildfly/wildfly.git $TRAVIS_HOME/wildfly
+git clone --depth=1 --branch=master https://github.com/wildfly/wildfly.git $TRAVIS_HOME/wildfly
 pushd $TRAVIS_HOME/wildfly
 mvn --quiet clean install -DskipTest=true
 popd
