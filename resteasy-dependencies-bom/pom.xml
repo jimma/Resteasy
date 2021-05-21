@@ -100,7 +100,8 @@
         <!-- MicroProfile versions -->
         <!-- todo replace this version when Final is released
         -->
-        <version.microprofile.restclient>2.0-$$jakarta9$$</version.microprofile.restclient>
+        <!-- Restclient dependency which change the jaxrs with jakarta package dependency -->
+        <version.microprofile.restclient>2.0.SP1</version.microprofile.restclient>
 
         <!-- todo rls move this property when updating all versions for MP-rest-client 2.0
         and return version to ${version.microprofile.restclient}
