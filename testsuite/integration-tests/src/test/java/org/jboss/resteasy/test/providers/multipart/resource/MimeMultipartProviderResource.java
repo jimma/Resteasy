@@ -1,5 +1,14 @@
 package org.jboss.resteasy.test.providers.multipart.resource;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
@@ -7,6 +16,7 @@ import org.jboss.resteasy.annotations.providers.multipart.XopWithMultipartRelate
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartConstants;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartInput;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartRelatedInput;
 import org.junit.Assert;
@@ -27,14 +37,6 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlMimeType;
 import jakarta.xml.bind.annotation.XmlRootElement;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 @Path("/mime")
 public class MimeMultipartProviderResource {
@@ -174,6 +176,33 @@ public class MimeMultipartProviderResource {
       Assert.assertNotNull(ERR_CUST_NULL, cust);
       Assert.assertEquals(ERR_VALUE, "monica", cust.getName());
 
+   }
+   @PUT
+   @Path("forminout")
+   @Consumes("multipart/form-data")
+   @Produces("multipart/form-data")
+   public MultipartFormDataOutput putMultipartFormDataInout(MultipartFormDataInput multipart)
+           throws IOException {
+      Assert.assertEquals(ERR_NUMBER, 2, multipart.getParts().size());
+
+      Assert.assertTrue(ERR_MULTIPART_FORM, multipart.getFormDataMap().containsKey("bill"));
+      Assert.assertTrue(ERR_MULTIPART_FORM, multipart.getFormDataMap().containsKey("monica"));
+
+      logger.info(multipart.getFormDataMap().get("bill").get(0).getBodyAsString());
+      MimeMultipartProviderCustomer cust = multipart.getFormDataPart("bill", MimeMultipartProviderCustomer.class, null);
+      Assert.assertNotNull(ERR_CUST_NULL, cust);
+      Assert.assertEquals(ERR_MULTIPART_FORM, "bill", cust.getName());
+
+      cust = multipart.getFormDataPart("monica", MimeMultipartProviderCustomer.class, null);
+      Assert.assertNotNull(ERR_CUST_NULL, cust);
+      Assert.assertEquals(ERR_VALUE, "monica", cust.getName());
+      java.io.File file = new java.io.File("/Users/jimma/data/code/resteasy-master/Resteasy/uuids.txt");
+      MultipartFormDataOutput mpfdo = new MultipartFormDataOutput();
+      mpfdo.addFormData("part1", "This is Value 1", MediaType.TEXT_PLAIN_TYPE);
+      mpfdo.addFormData("part2", "This is Value 2", MediaType.TEXT_PLAIN_TYPE);
+      mpfdo.addFormData("data.txt", file, MediaType.TEXT_PLAIN_TYPE);
+
+      return mpfdo;
    }
 
    @PUT

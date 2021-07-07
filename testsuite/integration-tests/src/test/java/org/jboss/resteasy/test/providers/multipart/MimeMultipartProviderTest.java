@@ -1,25 +1,40 @@
 package org.jboss.resteasy.test.providers.multipart;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.lang.reflect.ReflectPermission;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.client.jaxrs.ProxyBuilder;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartOutput;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartRelatedOutput;
+import org.jboss.resteasy.spi.HttpResponseCodes;
 import org.jboss.resteasy.test.providers.multipart.resource.MimeMultipartProviderClient;
 import org.jboss.resteasy.test.providers.multipart.resource.MimeMultipartProviderCustomer;
 import org.jboss.resteasy.test.providers.multipart.resource.MimeMultipartProviderResource;
-import org.jboss.resteasy.spi.HttpResponseCodes;
 import org.jboss.resteasy.utils.PermissionUtil;
 import org.jboss.resteasy.utils.PortProviderUtil;
 import org.jboss.resteasy.utils.TestUtil;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -30,19 +45,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.EntityPart;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
-import java.lang.reflect.ReflectPermission;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * @tpSubChapter Multipart provider
@@ -88,7 +95,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails MultipartFormDataOutput entity in put request with data from file is used
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testPutForm() throws Exception {
       // prepare file
       File file = new File(testFilePath);
@@ -110,7 +117,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails MultipartOutput entity in put request with data from file is used
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testPut() throws Exception {
       // prepare file
       File file = new File(testFilePath);
@@ -129,11 +136,38 @@ public class MimeMultipartProviderTest {
       Assert.assertEquals(ERR_NUMBER, responseBody, "Count: 3");
    }
 
+   @Test
+   public void testEntityPart() throws Exception {
+      File file = new File(testFilePath);
+      Assert.assertTrue("File " + testFilePath + " doesn't exists", file.exists());
+      List<EntityPart> parts = Arrays.asList(
+              EntityPart.withName("bill").content(createCustomerData("bill")).mediaType(MediaType.APPLICATION_XML_TYPE).build(),
+              EntityPart.withName("file").fileName("testfile.txt").content(new java.io.FileInputStream(file)).mediaType(MediaType.TEXT_PLAIN_TYPE).build());
+      Entity entity = Entity.entity(parts, MediaType.MULTIPART_FORM_DATA);
+      Response r =  client.target("http://127.0.0.1:9080/MimeMultipartProviderTest/mime/forminout").request().put(entity);
+   }
+
+   //@Test
+   public void testFormInOut() throws Exception {
+         MultipartFormDataOutput mpfdo = new MultipartFormDataOutput();
+         mpfdo.addFormData("bill", createCustomerData("bill"), MediaType.APPLICATION_XML_TYPE);
+         mpfdo.addFormData("monica", createCustomerData("monica"), MediaType.APPLICATION_XML_TYPE);
+
+         Response response = client.target("http://127.0.0.1:9080/MimeMultipartProviderTest/mime/forminout").request()
+                 .put(Entity.entity(mpfdo, MediaType.MULTIPART_FORM_DATA_TYPE));
+         Assert.assertEquals(HttpResponseCodes.SC_OK, response.getStatus());
+         MultipartFormDataInput input = response.readEntity(MultipartFormDataInput.class);
+         List<InputPart> inputList = input.getFormDataMap().get("data.txt");
+         File file =  inputList.get(0).getBody(File.class, null);
+         response.close();
+
+   }
+
    /**
     * @tpTestDetails MultipartFormDataOutput entity in put request with created by jxb marshaller is used
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testForm() throws Exception {
       testMultipart(TEST_URI + "/form");
       testMultipart(TEST_URI + "/form/map");
@@ -157,7 +191,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails MultipartOutput entity in put request with manually created jaxb objects is used
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testMultipartOutput() throws Exception {
       MimeMultipartProviderClient proxy = ProxyBuilder.builder(MimeMultipartProviderClient.class, client.target(generateURL(""))).build();
       MultipartOutput output = new MultipartOutput();
@@ -170,7 +204,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails MultipartFormDataOutput entity in put request with manually created jaxb objects is used
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testMultipartFormDataOutput() throws Exception {
       MimeMultipartProviderClient proxy = ProxyBuilder.builder(MimeMultipartProviderClient.class, client.target(generateURL(""))).build();
       MultipartFormDataOutput output = new MultipartFormDataOutput();
@@ -183,7 +217,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails  MultipartRelatedOutput entity in put request with manually generated xml is used
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testMultipartRelatedOutput() throws Exception {
       MimeMultipartProviderClient proxy = ProxyBuilder.builder(MimeMultipartProviderClient.class, client.target(generateURL(""))).build();
       MultipartRelatedOutput output = new MultipartRelatedOutput();
@@ -213,7 +247,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails List is send in put request with the @PartType annotation
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testMultipartList() throws Exception {
       MimeMultipartProviderClient proxy = ProxyBuilder.builder(MimeMultipartProviderClient.class, client.target(generateURL(""))).build();
       ArrayList<MimeMultipartProviderCustomer> mimeMultipartProviderCustomers = new ArrayList<MimeMultipartProviderCustomer>();
@@ -226,7 +260,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails Map is send in put request with the @PartType annotation
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testMultipartMap() throws Exception {
       MimeMultipartProviderClient proxy = ProxyBuilder.builder(MimeMultipartProviderClient.class, client.target(generateURL(""))).build();
       LinkedHashMap<String, MimeMultipartProviderCustomer> customers = new LinkedHashMap<String, MimeMultipartProviderCustomer>();
@@ -239,7 +273,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails Custom Form type in put request with @MultipartForm annotation
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   ///@Test
    public void testMultipartForm() throws Exception {
       MimeMultipartProviderClient proxy = ProxyBuilder.builder(MimeMultipartProviderClient.class, client.target(generateURL(""))).build();
       MimeMultipartProviderResource.Form form = new MimeMultipartProviderResource.Form(
@@ -251,7 +285,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails Custom jaxb object in put request with @XopWithMultipartRelated
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testXop() throws Exception {
       MimeMultipartProviderClient proxy = ProxyBuilder.builder(MimeMultipartProviderClient.class, client.target(generateURL(""))).build();
       MimeMultipartProviderResource.Xop xop = new MimeMultipartProviderResource.Xop(
@@ -271,11 +305,20 @@ public class MimeMultipartProviderTest {
       return data;
    }
 
+   private InputStream createCustomerDataInputStream(String name) throws JAXBException {
+      JAXBContext context = JAXBContext.newInstance(MimeMultipartProviderCustomer.class);
+      StringWriter writer = new StringWriter();
+      context.createMarshaller().marshal(new MimeMultipartProviderCustomer(name), writer);
+      ByteArrayInputStream bin = new ByteArrayInputStream(writer.toString().getBytes());
+      return bin;
+   }
+
+
    /**
     * @tpTestDetails Client sends get request for InputStream from the server
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testGet() throws Exception {
       Response response = client.target(TEST_URI).request().get();
       Assert.assertEquals(HttpServletResponse.SC_OK, response.getStatus());
@@ -291,7 +334,7 @@ public class MimeMultipartProviderTest {
     * @tpTestDetails Client sends post request with "multipart/form-data" and boundary definition
     * @tpSince RESTEasy 3.0.16
     */
-   @Test
+   //@Test
    public void testFile() throws Exception {
       Response response = client.target(TEST_URI + "/file/test").request()
             .post(Entity.entity(form, "multipart/form-data; boundary=---------------------------52524491016334132001492192799"));
