@@ -64,7 +64,7 @@ public class SseEventSinkTest
    }
 
    @Test
-   public void testCloseByEvnetSource() throws Exception
+   public void testCloseByEventSource() throws Exception
    {
       final CountDownLatch latch = new CountDownLatch(5);
       final List<String> results = new ArrayList<String>();
@@ -108,5 +108,40 @@ public class SseEventSinkTest
             results.indexOf("messageAfterClose") == -1);
       Assert.assertFalse("EventSink close is expected ", isOpenRequest.get().readEntity(Boolean.class));
 
+   }
+
+   /**
+    * @tpTestDetails Test deadlock in sending of first sse events seen in 3.7.2
+    * @tpInfo RESTEASY-3033
+    * @tpSince RESTEasy 3.7.2
+    */
+   @Test
+   public void testDeadlockAtInitializationRepeated() throws Exception {
+      for (int i = 0; i < 100; i++) {
+         testDeadlockAtInitialization();
+      }
+   }
+   public void testDeadlockAtInitialization() throws Exception {
+      final CountDownLatch latch = new CountDownLatch(1);
+      final List<String> results = new ArrayList<String>();
+      Client client = ClientBuilder.newClient();
+      WebTarget target = client.target(generateURL("/server-sent-events/initialization-deadlock"));
+      SseEventSource eventSource = SseEventSource.target(target).build();
+      eventSource.register(event -> {
+         String msg = event.readData(String.class);
+         results.add(msg);
+         if (msg.equals("last-msg")) {
+            latch.countDown();
+         }
+      }, ex -> {
+         logger.error(ex.getMessage(), ex);
+         throw new RuntimeException(ex);
+      });
+      eventSource.open();
+      boolean await = latch.await(30, TimeUnit.SECONDS);
+      Assert.assertTrue("Waiting for event to be delivered has timed out.", await);
+      eventSource.close();
+      Assert.assertFalse(eventSource.isOpen());
+      Assert.assertEquals("first-msg", results.get(0));
    }
 }
