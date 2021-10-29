@@ -57,7 +57,7 @@ public class SseEventOutputImpl extends GenericType<OutboundSseEvent> implements
 
    private volatile boolean responseFlushed = false;
 
-   private final Object lock = new Object();
+   private Object lock;
 
    private final ResteasyProviderFactory providerFactory;
 
@@ -88,6 +88,13 @@ public class SseEventOutputImpl extends GenericType<OutboundSseEvent> implements
       }
 
       response = ResteasyContext.getContextData(HttpResponse.class);
+      try
+      {
+        lock = response.getAsyncOutputStream();
+      }
+      catch (IOException e) {
+        lock = new Object();
+      }
    }
 
    @Override
