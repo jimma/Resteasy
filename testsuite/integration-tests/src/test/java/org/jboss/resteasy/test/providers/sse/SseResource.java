@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.ServletContext;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -29,7 +28,6 @@ import javax.ws.rs.sse.SseBroadcaster;
 import javax.ws.rs.sse.SseEventSink;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
-
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.plugins.providers.sse.SseConstants;
 
@@ -423,6 +421,25 @@ public class SseResource
          }
       });
    }
+   @GET
+   @Path("/sseOrder")
+   @Produces(MediaType.SERVER_SENT_EVENTS)
+   public void sseOrder(@Context SseEventSink sink) {
+      if (sink == null)
+      {
+         throw new IllegalStateException("No client connected.");
+      }
+      ExecutorService service = (ExecutorService) servletContext
+              .getAttribute(ExecutorServletContextListener.TEST_EXECUTOR);
+      service.execute(() -> {
+         int i = 0;
+         while (i <6) {
+            sink.send(sse.newEvent("msg-" + i++));
+         }
+         sink.send(sse.newEvent("last-msg-" + i));
+      });
+   }
+
    public static String toString(final Reader input) throws IOException {
 
        final char[] buffer = new char[2048];
