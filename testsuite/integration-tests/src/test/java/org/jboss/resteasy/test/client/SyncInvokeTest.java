@@ -58,6 +58,17 @@ public class SyncInvokeTest extends ClientTestBase {
         client.close();
     }
 
+    @Test
+    public void testPerformance() throws Exception {
+        for (int i = 0; i < 250000; i++) {
+            Response res = client.target(generateURL("/test")).request().get();
+            Assert.assertEquals(HttpResponseCodes.SC_OK, res.getStatus());
+            String entity = res.readEntity(String.class);
+            Assert.assertEquals("get", entity);
+        }
+
+    }
+
     /**
      * @tpTestDetails Client sends GET, PUT, DELETE, POST and custom defined requests. First request expects
      *                Response object in return, the second expects String object in return
