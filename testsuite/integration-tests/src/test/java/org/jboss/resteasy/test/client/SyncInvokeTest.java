@@ -1,5 +1,6 @@
 package org.jboss.resteasy.test.client;
 
+import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -56,6 +57,38 @@ public class SyncInvokeTest extends ClientTestBase {
     @After
     public void after() throws Exception {
         client.close();
+    }
+
+    @Test
+    public void testPerformance() throws Exception {
+        int result = -1;
+        do {
+            try {
+                Process process = Runtime.getRuntime().exec("pgrep -f profiler.sh");
+                process.waitFor();
+                result = process.exitValue();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            if (result != 0) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } while (result != 0);
+        //System.out.println("profile is started");
+
+        for (int i = 0; i < 250000; i++) {
+            Response res = client.target(generateURL("/test")).request().get();
+            Assert.assertEquals(HttpResponseCodes.SC_OK, res.getStatus());
+            String entity = res.readEntity(String.class);
+            Assert.assertEquals("get", entity);
+        }
+
     }
 
     /**
